@@ -19,6 +19,8 @@ public class Main {
         initializeField();
         printField();
         placeShips();
+        System.out.println("The game starts!");
+        takeShot();
     }
 
     private void initializeField() {
@@ -292,6 +294,31 @@ public class Main {
     private void validateBottomRightCornerOfVerticalShip(Coordinate tail) {
         if (field[tail.getRow() + 1][tail.getColumn() + 1] == SHIP_SECTION) {
             throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
+        }
+    }
+
+    private void takeShot() {
+        System.out.println("Take a shot!");
+        boolean isShotDone = false;
+        while (!isShotDone) {
+            try {
+                checkShot(new Coordinate(scanner.next()));
+                isShotDone = true;
+            } catch (IllegalArgumentException e) {
+                System.out.printf("%s Try again:%n", e.getMessage());
+            }
+        }
+    }
+
+    private void checkShot(Coordinate coordinate) {
+        if (field[coordinate.getRow()][coordinate.getColumn()] == SHIP_SECTION) {
+            field[coordinate.getRow()][coordinate.getColumn()] = 'X';
+            printField();
+            System.out.println("You hit a ship!");
+        } else {
+            field[coordinate.getRow()][coordinate.getColumn()] = 'M';
+            printField();
+            System.out.println("You missed!");
         }
     }
 }

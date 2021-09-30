@@ -13,7 +13,7 @@ public class Coordinate {
         int tempX = Integer.parseInt(coordinate.substring(1)) - 1;
         int tempY = coordinate.charAt(0) - 65;
         if (tempX > 9 || tempY > 9) {
-            throw new RuntimeException("Wrong coordinate!");
+            throw new IllegalArgumentException("Error! You entered the wrong coordinates!");
         }
         column = tempX;
         row = tempY;
