@@ -17,9 +17,10 @@ public class Main {
 
     public Main() {
         initializeField();
-        printField();
+        printOpenField();
         placeShips();
         System.out.println("The game starts!");
+        printHiddenField();
         takeShot();
     }
 
@@ -31,7 +32,16 @@ public class Main {
         }
     }
 
-    private void printField() {
+    private void printOpenField() {
+        printField(false);
+    }
+
+    private void printHiddenField() {
+        printField(true);
+    }
+
+    private void printField(boolean hideShips) {
+        System.out.println();
         System.out.print("  ");
         for (int i = 0; i < field.length; i++) {
             System.out.printf("%d ", i + 1);
@@ -40,7 +50,11 @@ public class Main {
         for (int i = 0; i < field.length; i++) {
             System.out.print((char) (65 + i) + " ");
             for (int j = 0; j < field[i].length; j++) {
-                System.out.printf("%s ", field[i][j]);
+                if (hideShips && field[i][j] == SHIP_SECTION) {
+                    System.out.printf("%s ", SEE_SECTION);
+                } else {
+                    System.out.printf("%s ", field[i][j]);
+                }
             }
             System.out.println();
         }
@@ -62,7 +76,7 @@ public class Main {
             try {
                 createShip(type, new Coordinate(scanner.next()), new Coordinate(scanner.next()));
                 isShipCreated = true;
-                printField();
+                printOpenField();
             } catch (IllegalArgumentException e) {
                 System.out.printf("%s Try again:%n", e.getMessage());
             }
@@ -313,12 +327,14 @@ public class Main {
     private void checkShot(Coordinate coordinate) {
         if (field[coordinate.getRow()][coordinate.getColumn()] == SHIP_SECTION) {
             field[coordinate.getRow()][coordinate.getColumn()] = 'X';
-            printField();
+            printHiddenField();
             System.out.println("You hit a ship!");
+            printOpenField();
         } else {
             field[coordinate.getRow()][coordinate.getColumn()] = 'M';
-            printField();
+            printHiddenField();
             System.out.println("You missed!");
+            printOpenField();
         }
     }
 }
