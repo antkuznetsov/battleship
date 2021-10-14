@@ -8,7 +8,6 @@ import static battleship.Square.*;
 
 public class Main {
     private static final int FIELD_SIZE = 10;
-    private static final String WRONG_PLACE_ERROR_TEXT = "Error! You placed it too close to another one.";
 
     private final Square[][] field = new Square[FIELD_SIZE][FIELD_SIZE];
     private final Scanner scanner = new Scanner(System.in);
@@ -91,6 +90,7 @@ public class Main {
     }
 
     private void createShip(Ship ship, Coordinate head, Coordinate tail) {
+        LocationValidator locationValidator;
         if (isHorizontalShip(head, tail)) {
             if (head.getColumn() > tail.getColumn()) {
                 Coordinate temp = head;
@@ -98,7 +98,8 @@ public class Main {
                 tail = temp;
             }
             validateShipLength(ship, head.getColumn(), tail.getColumn());
-            validateHorizontalShipLocation(head, tail);
+            locationValidator = new HorizontalLocationValidator(field);
+            locationValidator.validate(head, tail);
 
             // Place a ship
             for (int i = head.getColumn(); i <= tail.getColumn(); i++) {
@@ -112,7 +113,8 @@ public class Main {
                 tail = temp;
             }
             validateShipLength(ship, head.getRow(), tail.getRow());
-            validateVerticalShipLocation(head, tail);
+            locationValidator = new VerticalLocationValidator(field);
+            locationValidator.validate(head, tail);
 
             for (int i = head.getRow(); i <= tail.getRow(); i++) {
                 field[i][head.getColumn()] = SHIP;
@@ -132,191 +134,6 @@ public class Main {
     private void validateShipLength(Ship ship, int head, int tail) {
         if (tail - head + 1 != ship.getLength()) {
             throw new IllegalArgumentException(String.format("Error! Wrong length of the %s!", ship.getName()));
-        }
-    }
-
-    private void validateHorizontalShipLocation(Coordinate head, Coordinate tail) {
-        if (head.getRow() != 0) {
-            validateTopSideOfHorizontalShip(head, tail);
-            if (head.getColumn() != 0) {
-                validateTopLeftCorner(head);
-            }
-            if (tail.getColumn() != FIELD_SIZE - 1) {
-                validateTopRightCorner(head);
-            }
-        }
-        if (head.getRow() != FIELD_SIZE - 1) {
-            validateBottomSideOfHorizontalShip(head, tail);
-            if (head.getColumn() != 0) {
-                validateBottomLeftCorner(head);
-            }
-            if (tail.getColumn() != 0) {
-                validateBottomRightCorner(head);
-            }
-        }
-        if (head.getColumn() != 0) {
-            validateLeftSideOfHorizontalShip(head);
-            if (head.getRow() != 0) {
-                validateTopLeftCorner(head);
-            }
-            if (head.getRow() != FIELD_SIZE - 1) {
-                validateBottomLeftCorner(head);
-            }
-        }
-        if (tail.getColumn() != FIELD_SIZE - 1) {
-            validateRightSideOfHorizontalShip(head);
-            if (head.getRow() != 0) {
-                validateTopRightCorner(tail);
-            }
-            if (tail.getRow() != FIELD_SIZE - 1) {
-                validateBottomRightCorner(tail);
-            }
-        }
-    }
-
-    private void validateTopSideOfHorizontalShip(Coordinate head, Coordinate tail) {
-        for (int i = head.getColumn(); i <= tail.getColumn(); i++) {
-            if (field[head.getRow() - 1][i] == SHIP) {
-                throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-            }
-        }
-    }
-
-    private void validateBottomSideOfHorizontalShip(Coordinate head, Coordinate tail) {
-        for (int i = head.getColumn(); i <= tail.getColumn(); i++) {
-            if (field[head.getRow() + 1][i] == SHIP) {
-                throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-            }
-        }
-    }
-
-    private void validateLeftSideOfHorizontalShip(Coordinate head) {
-        if (field[head.getRow()][head.getColumn() - 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateRightSideOfHorizontalShip(Coordinate tail) {
-        if (field[tail.getRow()][tail.getColumn() + 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateTopLeftCorner(Coordinate head) {
-        if (field[head.getRow() - 1][head.getColumn() - 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateTopRightCorner(Coordinate tail) {
-        if (field[tail.getRow() - 1][tail.getColumn() + 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateBottomLeftCorner(Coordinate head) {
-        if (field[head.getRow() + 1][head.getColumn() - 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateBottomRightCorner(Coordinate tail) {
-        if (field[tail.getRow() + 1][tail.getColumn() + 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateVerticalShipLocation(Coordinate head, Coordinate tail) {
-        if (head.getRow() != 0) {
-            validateTopSideOfVerticalShip(head);
-            if (head.getColumn() != 0) {
-                validateTopLeftCornerOfVerticalShip(head);
-            }
-            if (head.getColumn() != FIELD_SIZE - 1) {
-                validateTopRightCornerOfVerticalShip(head);
-            }
-        }
-
-        if (tail.getRow() != FIELD_SIZE - 1) {
-            validateBottomSideOfVerticalShip(tail);
-            if (tail.getColumn() != 0) {
-                validateBottomLeftCornerOfVerticalShip(tail);
-            }
-            if (tail.getColumn() != FIELD_SIZE - 1) {
-                validateBottomRightCornerOfVerticalShip(tail);
-            }
-        }
-
-        if (head.getColumn() != 0) {
-            validateLeftSideOfVerticalShip(head, tail);
-            if (head.getRow() != 0) {
-                validateTopLeftCornerOfVerticalShip(head);
-            }
-            if (tail.getRow() != FIELD_SIZE - 1) {
-                validateBottomLeftCornerOfVerticalShip(tail);
-            }
-        }
-
-        if (head.getColumn() != FIELD_SIZE - 1) {
-            validateRightSideOfVerticalShip(head, tail);
-            if (tail.getRow() != 0) {
-                validateTopRightCornerOfVerticalShip(tail);
-            }
-            if (tail.getRow() != FIELD_SIZE - 1) {
-                validateBottomRightCornerOfVerticalShip(head);
-            }
-        }
-    }
-
-    private void validateTopSideOfVerticalShip(Coordinate head) {
-        if (field[head.getRow() - 1][head.getColumn()] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateBottomSideOfVerticalShip(Coordinate tail) {
-        if (field[tail.getRow() + 1][tail.getColumn()] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateLeftSideOfVerticalShip(Coordinate head, Coordinate tail) {
-        for (int i = head.getRow(); i <= tail.getRow(); i++) {
-            if (field[i][head.getColumn() - 1] == SHIP) {
-                throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-            }
-        }
-    }
-
-    private void validateRightSideOfVerticalShip(Coordinate head, Coordinate tail) {
-        for (int i = head.getRow(); i <= tail.getRow(); i++) {
-            if (field[i][head.getColumn() + 1] == SHIP) {
-                throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-            }
-        }
-    }
-
-    private void validateTopLeftCornerOfVerticalShip(Coordinate head) {
-        if (field[head.getRow() - 1][head.getColumn() - 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateTopRightCornerOfVerticalShip(Coordinate head) {
-        if (field[head.getRow() - 1][head.getColumn() + 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateBottomLeftCornerOfVerticalShip(Coordinate tail) {
-        if (field[tail.getRow() + 1][tail.getColumn() - 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
-        }
-    }
-
-    private void validateBottomRightCornerOfVerticalShip(Coordinate tail) {
-        if (field[tail.getRow() + 1][tail.getColumn() + 1] == SHIP) {
-            throw new IllegalArgumentException(WRONG_PLACE_ERROR_TEXT);
         }
     }
 
