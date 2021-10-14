@@ -1,15 +1,21 @@
 package battleship;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
     private static final int FIELD_SIZE = 10;
-    private static final char SEE_SECTION = '~';
+    private static final char SEA_SECTION = '~';
     private static final char SHIP_SECTION = 'O';
+    private static final char HIT_SECTION = 'X';
+    private static final char MISS_SECTION = 'M';
     private static final String WRONG_PLACE_ERROR_TEXT = "Error! You placed it too close to another one.";
 
     private final char[][] field = new char[FIELD_SIZE][FIELD_SIZE];
     private final Scanner scanner = new Scanner(System.in);
+
+    private final Map<Coordinate, Ship> ships = new HashMap<>();
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -21,13 +27,16 @@ public class Main {
         placeShips();
         System.out.println("The game starts!");
         printHiddenField();
-        takeShot();
+        while (!ships.isEmpty()) {
+            takeShot();
+        }
+        System.out.println("You sank the last ship. You won. Congratulations!");
     }
 
     private void initializeField() {
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
-                field[i][j] = SEE_SECTION;
+                field[i][j] = SEA_SECTION;
             }
         }
     }
@@ -51,7 +60,7 @@ public class Main {
             System.out.print((char) (65 + i) + " ");
             for (int j = 0; j < field[i].length; j++) {
                 if (hideShips && field[i][j] == SHIP_SECTION) {
-                    System.out.printf("%s ", SEE_SECTION);
+                    System.out.printf("%s ", SEA_SECTION);
                 } else {
                     System.out.printf("%s ", field[i][j]);
                 }
@@ -93,8 +102,10 @@ public class Main {
             validateShipLength(ship, head.getColumn(), tail.getColumn());
             validateHorizontalShipLocation(head, tail);
 
+            // Place a ship
             for (int i = head.getColumn(); i <= tail.getColumn(); i++) {
                 field[head.getRow()][i] = SHIP_SECTION;
+                ships.put(new Coordinate(head.getRow(), i), ship);
             }
         } else {
             if (head.getRow() > tail.getRow()) {
@@ -312,7 +323,6 @@ public class Main {
     }
 
     private void takeShot() {
-        System.out.println("Take a shot!");
         boolean isShotDone = false;
         while (!isShotDone) {
             try {
@@ -326,15 +336,23 @@ public class Main {
 
     private void checkShot(Coordinate coordinate) {
         if (field[coordinate.getRow()][coordinate.getColumn()] == SHIP_SECTION) {
-            field[coordinate.getRow()][coordinate.getColumn()] = 'X';
+            field[coordinate.getRow()][coordinate.getColumn()] = HIT_SECTION;
+            Ship ship = ships.get(coordinate);
+            ships.remove(coordinate);
             printHiddenField();
-            System.out.println("You hit a ship!");
-            printOpenField();
+            if (!ships.isEmpty()) {
+                if (ships.containsValue(ship)) {
+                    System.out.println("You hit a ship! Try again:");
+                } else {
+                    System.out.println("You sank a ship! Specify a new target:");
+                }
+            }
         } else {
-            field[coordinate.getRow()][coordinate.getColumn()] = 'M';
+            if (field[coordinate.getRow()][coordinate.getColumn()] != HIT_SECTION) {
+                field[coordinate.getRow()][coordinate.getColumn()] = MISS_SECTION;
+            }
             printHiddenField();
-            System.out.println("You missed!");
-            printOpenField();
+            System.out.println("You missed. Try again:");
         }
     }
 }
